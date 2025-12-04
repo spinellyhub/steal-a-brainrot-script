@@ -2,6 +2,7 @@
 -- Solo interfaz, sin interacción con el juego
 
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 -- ELEMENTOS
 local ScreenGui = Instance.new("ScreenGui")
@@ -19,7 +20,7 @@ local GlowBlue = Instance.new("UIStroke")
 local GlowRed = Instance.new("UIStroke")
 local Shadow = Instance.new("UIGradient")
 
-ScreenGui.Parent = game.CoreGui
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- FRAME FUTURISTA
 Frame.Parent = ScreenGui
@@ -42,7 +43,7 @@ Shadow.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(1, Color3.fromRGB(140, 0, 255))
 }
 
--- ANIMACIÓN DE APARICIÓN
+-- ANIMACIÓN DE APARICIÓN INICIAL
 Frame.Position = Frame.Position - UDim2.new(0,0,0.2,0)
 Frame.BackgroundTransparency = 1
 Glow.Transparency = 1
@@ -111,7 +112,7 @@ StatusMsg.Font = Enum.Font.Gotham
 StatusMsg.TextColor3 = Color3.fromRGB(0, 255, 255)
 StatusMsg.TextTransparency = 1
 
--- EFECTOS HOVER FUTURISTAS
+-- EFECTOS HOVER
 local function Hover(btn, orig, hover)
     btn.MouseEnter:Connect(function()
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = hover}):Play()
@@ -124,7 +125,7 @@ end
 Hover(ButtonBlue, Color3.fromRGB(0,100,255), Color3.fromRGB(0,150,255))
 Hover(ButtonRed, Color3.fromRGB(255,40,40), Color3.fromRGB(255,75,75))
 
--- MENSAJE "STEALING..." ANIMADO
+-- ANIMACIÓN "STEALING..."
 ButtonBlue.MouseButton1Click:Connect(function()
     StatusMsg.Text = "Stealing..."
     StatusMsg.TextTransparency = 1
@@ -135,7 +136,52 @@ ButtonBlue.MouseButton1Click:Connect(function()
     end)
 end)
 
--- CIERRE ANIMADO
+---------------------------------------------------------------------
+--          NUEVA FUNCIÓN: MINIMIZAR + "PRESS K TO OPEN"
+---------------------------------------------------------------------
+
+local ReOpenText = Instance.new("TextLabel")
+ReOpenText.Parent = ScreenGui
+ReOpenText.Size = UDim2.new(0, 200, 0, 30)
+ReOpenText.Position = UDim2.new(0.5, -100, 0.92, 0)
+ReOpenText.BackgroundTransparency = 1
+ReOpenText.Text = "Press K to open"
+ReOpenText.TextScaled = true
+ReOpenText.Font = Enum.Font.GothamBold
+ReOpenText.TextColor3 = Color3.fromRGB(0, 200, 255)
+ReOpenText.TextTransparency = 1 -- oculto al inicio
+
+-- ANIMACIÓN PARA ABRIR DE NUEVO
+local function OpenUI()
+    Frame.Visible = true
+
+    Frame.Position = UDim2.new(0.5, -110, 0.5, -120)
+    Frame.BackgroundTransparency = 1
+    Glow.Transparency = 1
+
+    TweenService:Create(Frame, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
+        Position = UDim2.new(0.5, -110, 0.5, -90),
+        BackgroundTransparency = 0.2
+    }):Play()
+
+    TweenService:Create(Glow, TweenInfo.new(0.4), {Transparency = 0.5}):Play()
+
+    TweenService:Create(ReOpenText, TweenInfo.new(0.3), {
+        TextTransparency = 1
+    }):Play()
+end
+
+-- DETECTAR TECLA K
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.K then
+        if Frame.Visible == false then
+            OpenUI()
+        end
+    end
+end)
+
+-- CIERRE + MINIMIZAR
 ButtonRed.MouseButton1Click:Connect(function()
     TweenService:Create(Frame, TweenInfo.new(0.4), {
         BackgroundTransparency = 1,
@@ -148,4 +194,10 @@ ButtonRed.MouseButton1Click:Connect(function()
 
     task.wait(0.4)
     Frame.Visible = false
+
+    -- Mostrar "Press K to open"
+    ReOpenText.TextTransparency = 1
+    TweenService:Create(ReOpenText, TweenInfo.new(0.4), {
+        TextTransparency = 0
+    }):Play()
 end)
