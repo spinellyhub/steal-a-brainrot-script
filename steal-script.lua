@@ -1,6 +1,4 @@
 -- SPINELLY HUB - FUTURISTIC UI (100% VISUAL)
--- Solo interfaz, sin interacción con el juego
-
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
@@ -11,6 +9,7 @@ local Title = Instance.new("TextLabel")
 local ButtonBlue = Instance.new("TextButton")
 local ButtonRed = Instance.new("TextButton")
 local StatusMsg = Instance.new("TextLabel")
+local CenterMsg = Instance.new("TextLabel")
 
 local CornerFrame = Instance.new("UICorner")
 local CornerBlue = Instance.new("UICorner")
@@ -69,7 +68,7 @@ Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
 Title.TextColor3 = Color3.fromRGB(0, 220, 255)
 
--- BOTÓN AZUL FUTURISTA
+-- BOTÓN AZUL
 ButtonBlue.Parent = Frame
 ButtonBlue.Size = UDim2.new(0.9, 0, 0, 40)
 ButtonBlue.Position = UDim2.new(0.05, 0, 0.32, 0)
@@ -85,7 +84,7 @@ GlowBlue.Color = Color3.fromRGB(0, 150, 255)
 GlowBlue.Thickness = 1.4
 GlowBlue.Transparency = 0.4
 
--- BOTÓN ROJO FUTURISTA
+-- BOTÓN ROJO
 ButtonRed.Parent = Frame
 ButtonRed.Size = UDim2.new(0.9, 0, 0, 40)
 ButtonRed.Position = UDim2.new(0.05, 0, 0.62, 0)
@@ -112,7 +111,18 @@ StatusMsg.Font = Enum.Font.Gotham
 StatusMsg.TextColor3 = Color3.fromRGB(0, 255, 255)
 StatusMsg.TextTransparency = 1
 
--- EFECTOS HOVER
+-- MENSAJE CENTRAL
+CenterMsg.Parent = ScreenGui
+CenterMsg.Size = UDim2.new(0, 300, 0, 50)
+CenterMsg.Position = UDim2.new(0.5, -150, 0.5, -25)
+CenterMsg.BackgroundTransparency = 1
+CenterMsg.Text = "Press K to open"
+CenterMsg.TextScaled = true
+CenterMsg.Font = Enum.Font.GothamBold
+CenterMsg.TextColor3 = Color3.fromRGB(0, 200, 255)
+CenterMsg.TextTransparency = 1 -- empieza invisible
+
+-- HOVER
 local function Hover(btn, orig, hover)
     btn.MouseEnter:Connect(function()
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = hover}):Play()
@@ -136,25 +146,9 @@ ButtonBlue.MouseButton1Click:Connect(function()
     end)
 end)
 
----------------------------------------------------------------------
---          NUEVA FUNCIÓN: MINIMIZAR + "PRESS K TO OPEN"
----------------------------------------------------------------------
-
-local ReOpenText = Instance.new("TextLabel")
-ReOpenText.Parent = ScreenGui
-ReOpenText.Size = UDim2.new(0, 200, 0, 30)
-ReOpenText.Position = UDim2.new(0.5, -100, 0.92, 0)
-ReOpenText.BackgroundTransparency = 1
-ReOpenText.Text = "Press K to open"
-ReOpenText.TextScaled = true
-ReOpenText.Font = Enum.Font.GothamBold
-ReOpenText.TextColor3 = Color3.fromRGB(0, 200, 255)
-ReOpenText.TextTransparency = 1 -- oculto al inicio
-
--- ANIMACIÓN PARA ABRIR DE NUEVO
+-- FUNCIONES PARA CERRAR Y ABRIR
 local function OpenUI()
     Frame.Visible = true
-
     Frame.Position = UDim2.new(0.5, -110, 0.5, -120)
     Frame.BackgroundTransparency = 1
     Glow.Transparency = 1
@@ -165,13 +159,32 @@ local function OpenUI()
     }):Play()
 
     TweenService:Create(Glow, TweenInfo.new(0.4), {Transparency = 0.5}):Play()
-
-    TweenService:Create(ReOpenText, TweenInfo.new(0.3), {
-        TextTransparency = 1
-    }):Play()
+    TweenService:Create(CenterMsg, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
 end
 
--- DETECTAR TECLA K
+-- CERRAR CON MENSAJE CENTRAL 3 SEGUNDOS
+ButtonRed.MouseButton1Click:Connect(function()
+    TweenService:Create(Frame, TweenInfo.new(0.4), {
+        BackgroundTransparency = 1,
+        Position = Frame.Position - UDim2.new(0,0,0.2,0)
+    }):Play()
+
+    TweenService:Create(Glow, TweenInfo.new(0.4), {Transparency = 1}):Play()
+
+    task.wait(0.4)
+    Frame.Visible = false
+
+    -- Mostrar mensaje central
+    CenterMsg.TextTransparency = 1
+    TweenService:Create(CenterMsg, TweenInfo.new(0.2), {TextTransparency = 0}):Play()
+
+    -- Se mantiene 3 segundos
+    task.delay(3, function()
+        TweenService:Create(CenterMsg, TweenInfo.new(0.2), {TextTransparency = 1}):Play()
+    end)
+end)
+
+-- REABRIR AL PRESIONAR K
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.K then
@@ -179,25 +192,4 @@ UserInputService.InputBegan:Connect(function(input, gp)
             OpenUI()
         end
     end
-end)
-
--- CIERRE + MINIMIZAR
-ButtonRed.MouseButton1Click:Connect(function()
-    TweenService:Create(Frame, TweenInfo.new(0.4), {
-        BackgroundTransparency = 1,
-        Position = Frame.Position - UDim2.new(0,0,0.2,0)
-    }):Play()
-
-    TweenService:Create(Glow, TweenInfo.new(0.4), {
-        Transparency = 1
-    }):Play()
-
-    task.wait(0.4)
-    Frame.Visible = false
-
-    -- Mostrar "Press K to open"
-    ReOpenText.TextTransparency = 1
-    TweenService:Create(ReOpenText, TweenInfo.new(0.4), {
-        TextTransparency = 0
-    }):Play()
 end)
